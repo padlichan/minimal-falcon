@@ -30,3 +30,23 @@ jobs:
       - name: Run tests
         run: |
           python -m pytest
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: Deploy to EC2 with SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/minimal-falcon || git clone https://github.com/padlichan/minimal-falcon/
+            cd ~/minimal-falcon
+            git pull origin main
+            docker build -t minimal-falcon:latest .
+            docker stop minimal-falcon || true
+            docker rm minimal-falcon || true
+            docker run -d --name minimal-falcon -p 8080:8080 minimal-falcon:latest
+
