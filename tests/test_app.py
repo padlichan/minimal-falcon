@@ -12,3 +12,8 @@ class TestPages(testing.TestCase):
         response = self.simulate_get('/')
         assert response.status == falcon.HTTP_200
         assert 'text/html' in response.content_type
+
+    def test_index_content(self):
+        response = self.simulate_get('/')
+        assert "<h1>" in response.text
+        
